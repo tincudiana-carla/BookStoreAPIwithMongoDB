@@ -1,6 +1,8 @@
 ﻿using BookStore.Application.GetBookById;
 using BookStore.Application.GetBooks;
 using BookStore.Application.GetWeatherForecast;
+using BookStore.Application.InsertBook;
+using BookStore.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -35,12 +37,22 @@ namespace BookStore.Controllers
             var response = await this.mediator.Send(new GetBooksRequest(), token);
             return this.Ok(response);
         }
+        
 
+        [HttpPost("InsertBook")]
+        public async Task<IActionResult> Insert([FromBody] Book book, CancellationToken token)
+        {
+            if (book == null)
+            {
+                return BadRequest();
+            }
 
+            var response = await this.mediator.Send(new InsertBookRequest { Book = book }, token);
+
+            return response.message == "S-a inserat cu succes!" ? Ok(response.message) : BadRequest(response.message); 
+        }
 
         /*
-     * GetAllAsync
-     * InsertAsync
      * DeleteAsync
      * UpdateAsync
      */
