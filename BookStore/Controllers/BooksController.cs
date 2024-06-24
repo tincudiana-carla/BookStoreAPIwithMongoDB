@@ -1,4 +1,5 @@
-﻿using BookStore.Application.GetBookById;
+﻿using BookStore.Application.DeleteBook;
+using BookStore.Application.GetBookById;
 using BookStore.Application.GetBooks;
 using BookStore.Application.GetWeatherForecast;
 using BookStore.Application.InsertBook;
@@ -21,15 +22,12 @@ namespace BookStore.Controllers
         }
 
 
-
-
         [HttpGet(Name = "GetBook/{id}")]
         public async Task<IActionResult> Get(string id, CancellationToken token)
         {
             var response = await this.mediator.Send(new GetBookByIdRequest { Id = id }, token);
             return this.Ok(response);
         }
-
 
 
         [HttpGet("GetBooks")]
@@ -43,33 +41,25 @@ namespace BookStore.Controllers
         [HttpPost("InsertBook")]
         public async Task<IActionResult> Insert([FromBody] Book book, CancellationToken token)
         {
-            if (book == null)
-            {
-                return BadRequest();
-            }
-
             var response = await this.mediator.Send(new InsertBookRequest { Book = book }, token);
-
             return response.message == "S-a inserat cu succes!" ? Ok(response.message) : BadRequest(response.message); 
         }
+
 
         [HttpPut("UpdateBook")]
         public async Task<IActionResult> Update([FromBody] Book book, CancellationToken token)
         {
-            if(book == null)
-            {
-                return BadRequest();
-            }
             var response = await this.mediator.Send(new UpdateBookRequest { Book = book }, token);
-
             return response.message == "S-a realizat update cu succes!" ? Ok(response.message) : BadRequest(response.message);
-
         }
 
-        /*
-     * DeleteAsync
-     * UpdateAsync
-     */
+
+        [HttpDelete("DeleteBook")]
+        public async Task<IActionResult> Delete(string id, CancellationToken token)
+        {
+            var response = await this.mediator.Send(new DeleteBookRequest { Id = id }, token);
+            return response.message == "S-a realizat delete cu succes!" ? Ok(response.message) : BadRequest(response.message);
+        }
 
     }
 }

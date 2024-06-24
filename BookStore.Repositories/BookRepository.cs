@@ -13,14 +13,18 @@ namespace BookStore.Repositories
             books = database.GetCollection<IMongoCollection<Book>, Book>("Books");
         }
 
-        public Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
+        public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var filter = Builders<Book>.Filter.Eq(book => book.Id, id);
+            var deleteResult = await this.books.DeleteOneAsync(filter, cancellationToken);
+            
+            return deleteResult.IsAcknowledged && deleteResult.DeletedCount > 0;
         }
 
         public async Task<List<Book>> GetAllAsync(CancellationToken cancellationToken)
         {
             var allBooks = await books.Find(_ => true).Limit(20).ToListAsync(cancellationToken); //am decis sa afisez doar 20 de carti pt ca in total sunt 10000 si ia laptopul razna cand rulez:))
+           
             return allBooks;
         }
 
@@ -28,14 +32,15 @@ namespace BookStore.Repositories
         {
             var filter = Builders<Book>.Filter.Eq(book => book.Id, id);
             var book = await this.books.Find(filter).FirstAsync(cancellationToken);
+
             return book;
         }
 
-        public async Task<string> InsertAsync(Book item, CancellationToken cancellationToken)
+        public async Task<string> InsertAsync(Book book, CancellationToken cancellationToken)
         {
-            await this.books.InsertOneAsync(item, cancellationToken);
+            await this.books.InsertOneAsync(book, cancellationToken);
 
-            return item.Id;
+            return book.Id;
         }
 
         public async Task<bool> UpdateAsync(Book book, CancellationToken cancellationToken)
