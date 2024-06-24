@@ -6,6 +6,7 @@ using BookStore.Application.InsertBook;
 using BookStore.Application.UpdateBook;
 using BookStore.Domain;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -13,6 +14,7 @@ namespace BookStore.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class BooksController : ControllerBase
     {
         private readonly IMediator mediator;
