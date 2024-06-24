@@ -38,9 +38,12 @@ namespace BookStore.Repositories
             return item.Id;
         }
 
-        public Task<bool> UpdateAsync(Book item, CancellationToken cancellationToken)
+        public async Task<bool> UpdateAsync(Book book, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var filter = Builders<Book>.Filter.Eq(b => b.Id, book.Id);
+            var updateResult = await this.books.ReplaceOneAsync(filter, book, new ReplaceOptions(), cancellationToken);
+
+            return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
         }
     }
 }

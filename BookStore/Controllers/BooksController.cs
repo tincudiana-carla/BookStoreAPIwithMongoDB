@@ -2,6 +2,7 @@
 using BookStore.Application.GetBooks;
 using BookStore.Application.GetWeatherForecast;
 using BookStore.Application.InsertBook;
+using BookStore.Application.UpdateBook;
 using BookStore.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +51,19 @@ namespace BookStore.Controllers
             var response = await this.mediator.Send(new InsertBookRequest { Book = book }, token);
 
             return response.message == "S-a inserat cu succes!" ? Ok(response.message) : BadRequest(response.message); 
+        }
+
+        [HttpPut("UpdateBook")]
+        public async Task<IActionResult> Update([FromBody] Book book, CancellationToken token)
+        {
+            if(book == null)
+            {
+                return BadRequest();
+            }
+            var response = await this.mediator.Send(new UpdateBookRequest { Book = book }, token);
+
+            return response.message == "S-a realizat update cu succes!" ? Ok(response.message) : BadRequest(response.message);
+
         }
 
         /*
