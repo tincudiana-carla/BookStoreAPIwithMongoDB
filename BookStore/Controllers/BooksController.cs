@@ -12,9 +12,9 @@ using MongoDB.Driver;
 
 namespace BookStore.Controllers
 {
+    
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
     public class BooksController : ControllerBase
     {
         private readonly IMediator mediator;
@@ -31,7 +31,7 @@ namespace BookStore.Controllers
             return this.Ok(response);
         }
 
-
+        [Authorize]
         [HttpGet("GetBooks")]
         public async Task<IActionResult> GetBooks(CancellationToken token)
         {

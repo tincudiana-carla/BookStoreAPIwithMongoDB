@@ -1,4 +1,5 @@
 ﻿using BookStore.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,29 +12,69 @@ namespace BookStore.Controllers
     [Route("[controller]")]
     public class AuthenticationController : Controller
     {
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDomain login)
-        {
-            if (login.Username == "test" && login.Password == "password") 
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes("o3o3mNNUQef2Pju8lWjQ0Pjv7HbBC4D0mS+U3+RU5GA="); 
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new Claim[]
-                    {
-                        new Claim(ClaimTypes.Name, login.Username)
-                    }),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
+        private IConfiguration _configuration;
+        
 
-                return Ok(new { Token = tokenString });
+            public AuthenticationController(IConfiguration config)
+            {
+                _configuration = config;
             }
 
-            return Unauthorized();
+            [HttpPost("login")]
+            public IActionResult Login([FromBody] LoginDomain userLogin)
+            {
+                var user = Authenticate(userLogin);
+
+                if (user != null)
+                {
+                    var token = Generate(user);
+                    return Ok(token);
+                }
+
+                return NotFound("User not found");
+            }
+
+            private string Generate(LoginDomain user)
+            {
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Username),
+                };
+
+                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
+                  _configuration["Jwt:Audience"],
+                  claims,
+                  expires: DateTime.Now.AddMinutes(15),
+                  signingCredentials: credentials);
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+
+            private LoginDomain Authenticate(LoginDomain userLogin)
+            {
+                var users = new List<LoginDomain>
+                {
+                    new LoginDomain { Username = "user1", Password = "password1" },
+                    new LoginDomain { Username = "user2", Password = "password2" },
+                    new LoginDomain { Username = "admin", Password = "adminpassword" }
+                };
+
+                var currentUser = users.FirstOrDefault(o =>
+                    o.Username.Equals(userLogin.Username, StringComparison.OrdinalIgnoreCase) &&
+                    o.Password == userLogin.Password);
+
+                if (currentUser != null)
+                {
+                    return currentUser;
+                }
+
+                return null;
+            }
         }
-    }
+
+
+    
 }

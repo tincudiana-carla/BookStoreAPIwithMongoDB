@@ -24,9 +24,6 @@ internal class Program
         // Add services to the container.
 
 
-
-
-
         var databaseSettings = new DatabaseConfiguration();
         builder.Configuration.Bind(nameof(DatabaseConfiguration), databaseSettings);
         builder.Services.AddSingleton<IDatabaseConfiguration>(databaseSettings);
@@ -34,30 +31,30 @@ internal class Program
         //builder.Services.AddSingleton<IDatabaseConfiguration>(builder.Configuration.Get<DatabaseConfiguration>());
         //builder.Services.AddSingleton<IDatabase, Database>();
         builder.Services.Scan(scan => scan.FromAssemblies(Assemblies)
-      .AddClasses(type => type.AssignableTo(typeof(IRepository<>))).AsImplementedInterfaces().WithScopedLifetime()
+        .AddClasses(type => type.AssignableTo(typeof(IRepository<>))).AsImplementedInterfaces().WithScopedLifetime()
         .AddClasses(type => type.AssignableTo(typeof(IDatabase))).AsImplementedInterfaces().WithSingletonLifetime()); //pt IDatabase
 
-        var key = Encoding.ASCII.GetBytes("o3o3mNNUQef2Pju8lWjQ0Pjv7HbBC4D0mS+U3+RU5GA="); 
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.RequireHttpsMetadata = false;
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
-            };
-        });
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
+                
 
+            });
+        builder.Services.AddMvc();
         builder.Services.AddControllers();
+        builder.Services.AddRazorPages();
+
+        builder.Services.AddAuthorization();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -75,10 +72,19 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
+        app.UseRouting();
+
+        app.UseAuthentication();
 
         app.UseAuthorization();
 
-        app.MapControllers();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+            endpoints.MapRazorPages();
+        });
 
         app.Run();
     }
