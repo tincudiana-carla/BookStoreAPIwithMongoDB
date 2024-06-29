@@ -1,14 +1,11 @@
-﻿using BookStore.Application.DeleteBook;
-using BookStore.Application.GetBookById;
-using BookStore.Application.GetBooks;
-using BookStore.Application.GetWeatherForecast;
-using BookStore.Application.InsertBook;
-using BookStore.Application.UpdateBook;
+﻿using BookStore.Application.Books.Application.DeleteBook;
+using BookStore.Application.Books.Application.GetBookById;
+using BookStore.Application.Books.Application.GetBooks;
+using BookStore.Application.Books.Application.InsertBook;
+using BookStore.Application.Books.Application.UpdateBook;
 using BookStore.Domain;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 
 namespace BookStore.Controllers
 {
@@ -31,7 +28,6 @@ namespace BookStore.Controllers
             return this.Ok(response);
         }
 
-        [Authorize]
         [HttpGet("GetBooks")]
         public async Task<IActionResult> GetBooks(CancellationToken token)
         {
