@@ -22,5 +22,21 @@ namespace BookStore.Controllers
             var count = await _bookService.GetNumberOfBooksBySerbianAuthorsAsync();
             return Ok(new { Count = count });
         }
+
+        [HttpGet("first-book-of-2022")]
+        public async Task<IActionResult> GetFirstBookOf2022()
+        {
+            var book = await _bookService.GetFirstBookOf2022Async();
+            return Ok(new
+            {
+                Title = book.Title,
+                YearOfPublication = book.YearOfPublication,
+                Author = new
+                {
+                    FirstName = book.Author.FirstName,
+                    LastName = book.Author.LastName
+                }
+            });
+        }
     }
 }
