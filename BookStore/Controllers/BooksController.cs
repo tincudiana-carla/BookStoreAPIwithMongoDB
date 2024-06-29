@@ -3,6 +3,7 @@ using BookStore.Application.Books.Application.GetBookById;
 using BookStore.Application.Books.Application.GetBooks;
 using BookStore.Application.Books.Application.InsertBook;
 using BookStore.Application.Books.Application.UpdateBook;
+using BookStore.Data.MongoDB;
 using BookStore.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +59,8 @@ namespace BookStore.Controllers
             var response = await this.mediator.Send(new DeleteBookRequest { Id = id }, token);
             return response.message == "S-a realizat delete cu succes!" ? Ok(response.message) : BadRequest(response.message);
         }
+
+      
 
     }
 }

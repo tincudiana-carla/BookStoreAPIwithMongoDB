@@ -30,6 +30,7 @@ internal class Program
 
         //builder.Services.AddSingleton<IDatabaseConfiguration>(builder.Configuration.Get<DatabaseConfiguration>());
         //builder.Services.AddSingleton<IDatabase, Database>();
+        builder.Services.AddScoped<BookService>();
         builder.Services.Scan(scan => scan.FromAssemblies(Assemblies)
         .AddClasses(type => type.AssignableTo(typeof(IRepository<>))).AsImplementedInterfaces().WithScopedLifetime()
         .AddClasses(type => type.AssignableTo(typeof(IDatabase))).AsImplementedInterfaces().WithSingletonLifetime()); //pt IDatabase
