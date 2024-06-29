@@ -85,6 +85,21 @@ namespace BookStore.Data.MongoDB
 
             return result;
         }
+
+        public async Task<List<Book>> FindBooksByTitleContainingMetalAsync()
+        {
+            var pipeline = new BsonDocument[]
+            {
+            BsonDocument.Parse("{ $match: { Title: { $regex: 'metal', $options: 'i' } } }"),
+            BsonDocument.Parse("{ $project: { _id: 0, Title: 1, AuthorId: 1, YearOfPublication: 1 } }"),
+
+            };
+
+            var result = await _books.Aggregate<Book>(pipeline).ToListAsync();
+
+            return result;
+        }
+
     }
 }
 

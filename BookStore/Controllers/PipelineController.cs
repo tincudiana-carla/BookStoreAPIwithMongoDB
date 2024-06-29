@@ -38,5 +38,12 @@ namespace BookStore.Controllers
                 }
             });
         }
+
+        [HttpGet("titles-containing-metal")]
+        public async Task<IActionResult> GetBooksContainingMetal()
+        {
+            var books = await _bookService.FindBooksByTitleContainingMetalAsync();
+            return Ok(books);
+        }
     }
 }
